@@ -47,19 +47,20 @@ model = Conformer(
 )
 
 # Get sample input
-inputs = tf.expand_dims(inputs, axis=1)
-
-# Convert to 4-dimensional tensor to fit Conv2D
 inputs = tf.random.uniform((batch_size, seq_len, d_model),
                             minval=-40,
                             maxval=40)
+inputs = tf.expand_dims(inputs, axis=1)
+
+# Convert to 4-dimensional tensor to fit Conv2D
+inputs = tf.expand_dims(inputs, axis=1)  
 
 # Get output
 outputs = model(inputs)     # [batch_size, 1, seq_len, num_class]
 outputs = tf.squeeze(outputs, axis=1)
 ```
   
-# Reference  
+# References  
 <a id="1">[1]</a> 
 Conformer: Convolution-augmented Transformer for Speech Recognition [🔗](https://arxiv.org/abs/2005.08100)  
   
