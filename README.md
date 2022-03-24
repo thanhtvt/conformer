@@ -34,7 +34,7 @@ pip install tensorflow-io   # optional
 import tensorflow as tf
 from conformer import Conformer
 
-batch_size, seq_len, d_model = 3, 15, 512
+batch_size, seq_len, input_dim = 3, 15, 256
 
 model = Conformer(
     num_conv_filters=[512, 512], 
@@ -47,10 +47,9 @@ model = Conformer(
 )
 
 # Get sample input
-inputs = tf.random.uniform((batch_size, seq_len, d_model),
+inputs = tf.random.uniform((batch_size, seq_len, input_dim),
                             minval=-40,
                             maxval=40)
-inputs = tf.expand_dims(inputs, axis=1)
 
 # Convert to 4-dimensional tensor to fit Conv2D
 inputs = tf.expand_dims(inputs, axis=1)  
