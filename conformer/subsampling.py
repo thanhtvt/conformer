@@ -1,35 +1,56 @@
 import tensorflow as tf
-from typing import List
+from typing import Optional
+
+
+L2 = tf.keras.regularizers.l2(1e-6)
 
 
 class ConvSubsampling(tf.keras.layers.Layer):
-    def __init__(self,
-                 filters: List[int],
-                 kernel_size: List[int] = [3, 3],
-                 num_blocks: int = 1,
-                 num_layers_per_block: int = 2,
-                 dropout_rate: float = 0.0,
-                 name: str = "ConvSubsampling",
-                 **kwargs):
-        
+    def __init__(
+        self,
+        filters: int,
+        kernel_size: int = 3,
+        strides: int = 1,
+        dropout_rate: float = 0.0,
+        kernel_regularizer: Optional[tf.keras.regularizers.Regularizer] = L2,
+        bias_regularizer: Optional[tf.keras.regularizers.Regularizer] = L2,
+        name: str = "ConvSubsampling",
+        **kwargs
+    ):
         super(ConvSubsampling, self).__init__(name=name, **kwargs)
-        
-        self.conv_blocks = tf.keras.Sequential()
-        for i in range(num_blocks):
-            convs = tf.keras.Sequential()
-            for _ in range(num_layers_per_block):
-                conv = tf.keras.layers.Conv2D(filters=filters[i],
-                                              kernel_size=kernel_size[i],
-                                              padding='same')
-                dropout = tf.keras.layers.Dropout(rate=dropout_rate)
-                relu = tf.keras.layers.ReLU()
 
-                convs.add(conv)
-                convs.add(dropout)
-                convs.add(relu)
-            
-            self.conv_blocks.add(convs)
+        self.conv1 = tf.keras.layers.Conv2D(
+            filters=filters,
+            kernel_size=kernel_size,
+            strides=strides,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer,
+            padding='same',
+            name=f'{name}_conv1'
+        )
+        self.do1 = tf.keras.layers.Dropout(rate=dropout_rate, name=f'{name}_do1')
+        self.relu1 = tf.keras.layers.ReLU(name=f'{name}_relu1')
+        self.conv2 = tf.keras.layers.Conv2D(
+            filters=filters,
+            kernel_size=kernel_size,
+            strides=strides,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer,
+            padding='same',
+            name=f'{name}_conv2'
+        )
+        self.do2 = tf.keras.layers.Dropout(rate=dropout_rate, name=f'{name}_do2')
+        self.relu2 = tf.keras.layers.ReLU(name=f'{name}_relu2')
+        
+    def summary(self):
+        pass
     
     def call(self, inputs, training=False, **kwargs):
-        outputs = self.conv_blocks(inputs, training=training)
+        outputs = self.conv1(inputs, training=training)
+        outputs = self.do1(outputs, training=training)
+        outputs = self.relu1(outputs)
+        outputs = self.conv2(outputs, training=training)
+        outputs = self.do2(outputs, training=training)
+        outputs = self.relu2(outputs)
+
         return outputs
